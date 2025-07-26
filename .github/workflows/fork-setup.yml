@@ -152,57 +152,62 @@ jobs:
     - name: Create upstream sync workflow
       run: |
         mkdir -p .github/workflows
-        cat > .github/workflows/sync-upstream.yml << 'EOF'
-name: Sync with Upstream
-
-on:
-  schedule:
-    # Run weekly on Mondays at 00:00 UTC
-    - cron: '0 0 * * 1'
-  workflow_dispatch:
-    inputs:
-      sync_method:
-        description: 'Sync method'
-        required: true
-        default: 'merge'
-        type: choice
-        options:
-          - merge
-          - rebase
-
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Add upstream remote
-      run: |
-        git remote add upstream https://github.com/redpop/claude-code-slash-commands.git || true
-        git fetch upstream
-
-    - name: Sync with upstream
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
         
-        SYNC_METHOD="${{ github.event.inputs.sync_method || 'merge' }}"
+        # Create sync workflow file
+        cat > .github/workflows/sync-upstream.yml << 'EOFWORKFLOW'
+        name: Sync with Upstream
         
-        if [ "$SYNC_METHOD" = "rebase" ]; then
-          git rebase upstream/main
-        else
-          git merge upstream/main -m "Merge upstream changes"
-        fi
-
-    - name: Push changes
-      run: |
-        git push origin main
-EOF
+        on:
+          schedule:
+            # Run weekly on Mondays at 00:00 UTC
+            - cron: '0 0 * * 1'
+          workflow_dispatch:
+            inputs:
+              sync_method:
+                description: 'Sync method'
+                required: true
+                default: 'merge'
+                type: choice
+                options:
+                  - merge
+                  - rebase
+        
+        jobs:
+          sync:
+            runs-on: ubuntu-latest
+            
+            steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+                token: \${{ secrets.GITHUB_TOKEN }}
+        
+            - name: Add upstream remote
+              run: |
+                git remote add upstream https://github.com/redpop/claude-code-slash-commands.git || true
+                git fetch upstream
+        
+            - name: Sync with upstream
+              run: |
+                git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                git config --local user.name "github-actions[bot]"
+                
+                SYNC_METHOD="\${{ github.event.inputs.sync_method || 'merge' }}"
+                
+                if [ "\$SYNC_METHOD" = "rebase" ]; then
+                  git rebase upstream/main
+                else
+                  git merge upstream/main -m "Merge upstream changes"
+                fi
+        
+            - name: Push changes
+              run: |
+                git push origin main
+        EOFWORKFLOW
+        
+        # Remove the leading spaces that the heredoc added
+        sed -i 's/^        //' .github/workflows/sync-upstream.yml
 
     - name: Commit sync workflow
       run: |
