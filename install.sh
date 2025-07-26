@@ -136,36 +136,83 @@ if [ ! -d "$INSTALL_PATH/.git" ]; then
             echo "!CLAUDE.md"
             echo "!.gitignore"
             echo "!CHANGELOG.md"
-            echo "!commands"
+            # Important: Track commands directory to get new files on pull
+            echo "commands/**"
         } > .git/info/sparse-checkout
         
         # Create a custom git hook to handle updates
-        cat > .git/hooks/post-merge << 'EOF'
+        cat > .git/hooks/post-merge << 'HOOKEOF'
 #!/bin/bash
 # Post-merge hook to handle directory structure after pull
 
-# Check if commands directory exists after merge
+# Function to get list of command files from git
+get_git_command_files() {
+    git ls-tree -r HEAD --name-only | grep "^commands/" | sed 's|^commands/||' | grep -v "^$"
+}
+
+# Function to get list of local command files
+get_local_command_files() {
+    find . -name "*.md" -not -path "./.git/*" -not -path "./commands/*" | sed 's|^\./||'
+}
+
+# Step 1: Remove local files that no longer exist in git
+echo "Checking for removed commands..."
+for local_file in $(get_local_command_files); do
+    if ! get_git_command_files | grep -q "^${local_file}$"; then
+        echo "Removing obsolete command: $local_file"
+        rm -f "$local_file"
+        # Remove empty directories
+        dir=$(dirname "$local_file")
+        if [ "$dir" != "." ] && [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
+            rmdir "$dir" 2>/dev/null || true
+        fi
+    fi
+done
+
+# Step 2: Move new/updated files from commands/ to root
 if [ -d "commands" ]; then
-    # Move content from commands/ to root
-    for item in commands/*; do
-        if [ -e "$item" ]; then
-            base_name=$(basename "$item")
-            # If directory already exists, merge content
-            if [ -d "$base_name" ]; then
-                cp -r "$item"/* "$base_name/" 2>/dev/null || true
+    echo "Processing new/updated commands..."
+    # Use find to handle nested directories properly
+    find commands -type f -name "*.md" | while read -r file; do
+        # Get relative path from commands/
+        rel_path="${file#commands/}"
+        target_dir=$(dirname "$rel_path")
+        
+        # Create target directory if needed
+        if [ "$target_dir" != "." ]; then
+            mkdir -p "$target_dir"
+        fi
+        
+        # Move or update the file
+        if [ -f "$rel_path" ]; then
+            # File exists, check if it's newer
+            if [ "$file" -nt "$rel_path" ]; then
+                echo "Updating: $rel_path"
+                mv -f "$file" "$rel_path"
             else
-                mv "$item" . 2>/dev/null || true
+                rm -f "$file"
             fi
+        else
+            echo "Adding new command: $rel_path"
+            mv "$file" "$rel_path"
         fi
     done
-    # Remove empty commands directory
-    rmdir commands 2>/dev/null || true
+    
+    # Clean up empty directories in commands/
+    find commands -type d -empty -delete 2>/dev/null || true
 fi
 
-# Clean up any unwanted files
+# Step 3: Clean up any unwanted files
 rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore CHANGELOG.md 2>/dev/null || true
-EOF
+
+# Step 4: Ensure sparse-checkout is properly configured
+git sparse-checkout reapply 2>/dev/null || true
+HOOKEOF
         chmod +x .git/hooks/post-merge
+        
+        # Also create post-checkout hook (git pull sometimes uses checkout instead of merge)
+        cp .git/hooks/post-merge .git/hooks/post-checkout
+        chmod +x .git/hooks/post-checkout
         
         print_success "Commands installed successfully!"
     else
