@@ -1,65 +1,63 @@
 ---
-description: Manages CHANGELOG.md entries following Keep a Changelog format with version management
-argument-hint: <version> <change_type> <message> [--commit] [--update-version]
+description: AI-powered CHANGELOG.md management that automatically determines version based on changes
+argument-hint: [--analyze] [--commit] [--update-version]
 ---
 
 # Claude Command: Changelog
 
-This command adds entries to your project's CHANGELOG.md file following the [Keep a Changelog](https://keepachangelog.com/) format and [Semantic Versioning](https://semver.org/) conventions.
+This command intelligently manages your project's CHANGELOG.md file by analyzing your changes and automatically determining the appropriate version bump following [Keep a Changelog](https://keepachangelog.com/) format and [Semantic Versioning](https://semver.org/) conventions.
 
 ## Usage
 
 ```
-/changelog <version> <change_type> <message>
-/changelog <version> <change_type> <message> --commit
-/changelog <version> <change_type> <message> --update-version
-/changelog <version> <change_type> <message> --commit --update-version
+/changelog                              # AI determines version and updates changelog
+/changelog --analyze                    # Preview what version would be chosen without making changes
+/changelog --commit                     # Update changelog and commit using git commit command
+/changelog --update-version             # Also update version in package files
+/changelog --commit --update-version    # Full automated workflow
 ```
 
 ### Arguments
 
-- `<version>`: Version number (e.g., "1.2.0", "2.0.0-beta.1", or "unreleased")
-- `<change_type>`: One of: added, changed, deprecated, removed, fixed, security
-- `<message>`: Description of the change (use quotes for multi-word messages)
-- `--commit`: Automatically commit the changelog update
+- `--analyze`: Preview mode - shows what version would be chosen and what changes would be added
+- `--commit`: Automatically commit the changelog update (uses `/git/commit` command if available)
 - `--update-version`: Update version in package files (package.json, pyproject.toml, etc.)
 
 ## Examples
 
 ```
-/changelog 1.2.0 added "Support for WebSocket connections"
-/changelog 2.0.0 changed "Redesigned authentication system" --commit
-/changelog unreleased fixed "Memory leak in cache layer"
-/changelog 1.3.0 security "Updated dependencies to patch CVE-2024-1234" --update-version --commit
+/changelog                                    # Basic usage - AI analyzes and updates changelog
+/changelog --analyze                          # See what would happen without changes
+/changelog --commit                           # Update and commit with proper message
+/changelog --commit --update-version          # Full release workflow
 ```
 
 ## What This Command Does
 
-1. **Validates Input**:
-   - Ensures version follows semantic versioning format (X.Y.Z) or is "unreleased"
-   - Validates change_type is one of the allowed types
-   - Checks for proper quoting of multi-word messages
+1. **Analyzes Your Changes**:
+   - Reviews git history since last version/tag
+   - Examines uncommitted changes and staged files
+   - Identifies breaking changes, new features, and bug fixes
+   - Categorizes changes by type (added, changed, deprecated, removed, fixed, security)
 
-2. **Analyzes Project Structure**:
-   - Detects project type based on presence of package files
-   - Identifies version fields in:
-     - `package.json` (Node.js)
-     - `pyproject.toml` (Python)
-     - `Cargo.toml` (Rust)
-     - `pom.xml` (Java/Maven)
-     - `build.gradle` (Java/Gradle)
-     - `setup.py` (Python)
-     - `__init__.py` with `__version__`
+2. **Determines Version Automatically**:
+   - **Major bump (X.0.0)**: Breaking changes, removed features, API changes
+   - **Minor bump (0.X.0)**: New features, added functionality
+   - **Patch bump (0.0.X)**: Bug fixes, documentation, refactoring
+   - Reads current version from existing CHANGELOG.md or package files
+   - Calculates next version based on change severity
 
 3. **Manages Changelog**:
    - Creates CHANGELOG.md if it doesn't exist with proper header
-   - Finds or creates version section with today's date
-   - Adds entry under appropriate change type with emoji prefix
-   - Maintains proper formatting and structure
+   - Adds new version section with today's date
+   - Groups changes by type with emoji prefixes
+   - Maintains proper Keep a Changelog formatting
+   - Preserves existing changelog content
 
 4. **Optional Actions**:
-   - Updates version in detected package files (--update-version)
-   - Commits changes with conventional commit message (--commit)
+   - **--analyze**: Preview mode to see what would happen
+   - **--update-version**: Updates version in all detected package files
+   - **--commit**: Integrates with `/git/commit` command for proper commit workflow
 
 ## Change Type Emojis
 
@@ -103,57 +101,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Workflow Steps
 
-1. **Parse and Validate Arguments**:
-   - Extract version, change_type, and message
-   - Validate semantic version format (unless "unreleased")
-   - Ensure change_type is valid
+1. **Analyze Repository State**:
+   - Get current version from CHANGELOG.md or package files
+   - List all commits since last version tag
+   - Examine uncommitted and staged changes
+   - Parse commit messages for conventional commit types
 
-2. **Check/Create Changelog**:
-   - Look for CHANGELOG.md in project root
-   - Create with standard header if missing
-   - Read existing content for modification
+2. **Determine Version Bump**:
+   - Scan for breaking change indicators:
+     - Commit messages with "BREAKING:", "BREAKING CHANGE:"
+     - Major API changes or removed features
+   - Identify new features (feat: commits) → Minor bump
+   - Identify fixes (fix: commits) → Patch bump
+   - Choose highest severity change for version bump
 
-3. **Process Version Section**:
-   - For "unreleased": Add to [Unreleased] section
-   - For specific version:
-     - Check if version section exists
-     - Create new section with current date if missing
-     - Position correctly (newer versions first)
+3. **Generate Changelog Entries**:
+   - Group commits and changes by type
+   - Extract meaningful descriptions from commit messages
+   - Format entries with appropriate emoji prefixes
+   - Organize by category (Added, Changed, Fixed, etc.)
 
-4. **Add Change Entry**:
-   - Find or create change type subsection
-   - Add entry with emoji prefix and message
-   - Maintain alphabetical order within subsections
+4. **Update CHANGELOG.md**:
+   - Create file with Keep a Changelog header if missing
+   - Add new version section with current date
+   - Insert categorized entries
+   - Maintain proper formatting and structure
 
 5. **Update Version Files** (if --update-version):
-   - Detect package files in project
-   - Update version fields appropriately
-   - Validate JSON/TOML syntax after update
+   - Detect all package files in project
+   - Update version fields to new version
+   - Validate file syntax after updates
 
 6. **Commit Changes** (if --commit):
-   - Stage CHANGELOG.md and any updated package files
-   - Create commit with message: `📝 docs: update changelog for v{version}`
-   - Show commit status
+   - Check if `/commands/git/commit.md` exists
+   - If exists: Use git commit command workflow
+     - Run pre-commit checks (lint, build, docs)
+     - Create conventional commit with emoji
+   - If not exists: Simple git commit
+   - Commit message: `📝 docs: update changelog for v{version}`
+
+## AI Version Detection
+
+The AI analyzes your codebase to determine the appropriate version bump:
+
+### Breaking Changes (Major Version X.0.0)
+- Commits containing "BREAKING:", "BREAKING CHANGE:"
+- Removed public APIs or features
+- Incompatible changes to existing functionality
+- Major architectural changes
+
+### New Features (Minor Version 0.X.0)
+- Commits with type `feat:`
+- New functionality added
+- New public APIs
+- Backward-compatible enhancements
+
+### Bug Fixes (Patch Version 0.0.X)
+- Commits with type `fix:`
+- Documentation updates
+- Performance improvements
+- Refactoring without API changes
 
 ## Best Practices
 
-- **Semantic Versioning**:
-  - MAJOR (X.0.0): Breaking changes
-  - MINOR (0.X.0): New features, backwards compatible
-  - PATCH (0.0.X): Bug fixes, backwards compatible
+- **Commit Messages Matter**: Use conventional commits for better AI detection
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `BREAKING CHANGE:` for breaking changes
+  
+- **Review Before Committing**: Use `--analyze` to preview changes first
 
-- **Clear Messages**:
-  - Start with action verb (Add, Update, Fix, Remove)
-  - Be specific about what changed
-  - Reference issue numbers when applicable
+- **Full Release Workflow**: Use `--commit --update-version` for complete automation
 
-- **Unreleased Section**:
-  - Use for changes not yet in a release
-  - Move entries to versioned section when releasing
-
-- **Grouping Changes**:
-  - Keep related changes together
-  - Order by importance within sections
+- **Keep Commits Atomic**: Smaller, focused commits help AI categorize changes accurately
 
 ## Version Update Support
 
@@ -204,73 +224,98 @@ version = "1.2.0"
 ## Error Handling
 
 The command handles:
-- Missing CHANGELOG.md (creates new)
-- Invalid version format (shows proper format)
-- Invalid change type (lists valid options)
+- Missing CHANGELOG.md (creates new with proper format)
+- No previous version found (starts from 0.1.0)
+- Conflicting changes (prompts for clarification)
 - File permission issues
 - Malformed existing changelog (attempts repair)
-- Version conflicts (warns user)
+- Git repository not initialized (clear error message)
+- No changes detected (informs user)
 
 ## Important Notes
 
+- AI intelligently determines version based on change severity
 - Always uses today's date for new version sections
-- Preserves existing changelog formatting
-- Maintains newlines and spacing conventions
+- Preserves existing changelog formatting and content
 - Creates backup before major modifications
 - Validates all changes before writing
-- For "unreleased" version, no date is added
-- Emoji prefixes are added automatically
-- Change types are case-insensitive in input
-- Messages are automatically capitalized
+- Emoji prefixes are added automatically based on change type
+- Integrates seamlessly with git commit command when available
+- Supports both new projects and existing ones with version history
+- Analyzes both committed and uncommitted changes
 
-## Integration with Git
+## Integration with Git Commit Command
 
 When using `--commit`:
-- Ensures git repository exists
-- Checks for uncommitted changes
-- Stages only changelog and version files
-- Uses conventional commit format
+- First checks if `/commands/git/commit.md` exists in the project
+- If the git commit command exists:
+  - Runs pre-commit checks (lint, build, generate:docs)
+  - Uses conventional commit format with emojis
+  - Creates descriptive commit message
+  - Follows the git commit command workflow
+- If git commit command doesn't exist:
+  - Falls back to simple git commit
+  - Still uses conventional format: `📝 docs: update changelog for v{version}`
 - Shows git status after commit
+- Only stages CHANGELOG.md and version files (if --update-version used)
 
-## Examples of Generated Entries
+## Examples of AI-Generated Changelog
 
-### Simple Addition
-```
-/changelog 1.1.0 added "User authentication system"
-```
-Results in:
+### Example 1: Feature Release
+After commits:
+- `feat: add user authentication system`
+- `feat: implement OAuth2 integration`
+- `fix: resolve login timeout issue`
+
+Running `/changelog --commit` generates:
 ```markdown
+## [1.2.0] - 2024-01-26
+
 ### Added
 - ✨ User authentication system
+- ✨ OAuth2 integration
+
+### Fixed
+- 🐛 Resolve login timeout issue
 ```
 
-### Security Fix with Commit
+### Example 2: Breaking Change
+After commits:
+- `feat!: redesign API endpoints`
+- `BREAKING CHANGE: remove deprecated v1 endpoints`
+- `fix: update error handling`
+
+Running `/changelog --analyze` shows:
 ```
-/changelog 1.0.1 security "Patch XSS vulnerability in comment system" --commit
-```
-Results in:
-```markdown
-### Security
-- 🔒 Patch XSS vulnerability in comment system
+Version bump: 1.1.0 → 2.0.0 (MAJOR - breaking changes detected)
+Changes to be added:
+- Breaking: Redesign API endpoints, remove deprecated v1 endpoints
+- Fixed: Update error handling
 ```
 
-### Unreleased Feature
-```
-/changelog unreleased added "Dark mode support"
-```
-Results in:
-```markdown
-## [Unreleased]
+### Example 3: Patch Release
+After commits:
+- `fix: memory leak in cache layer`
+- `docs: update API documentation`
+- `chore: update dependencies`
 
-### Added
-- ✨ Dark mode support
-```
+Running `/changelog --commit --update-version`:
+- Determines version: 1.1.1 (patch bump)
+- Updates CHANGELOG.md
+- Updates version in package.json
+- Commits with: `📝 docs: update changelog for v1.1.1`
 
-### Version Update with Commit
+### Example 4: Preview Mode
+Running `/changelog --analyze` without making changes:
 ```
-/changelog 2.0.0 changed "Complete API redesign" --update-version --commit
-```
-Updates version in all package files and commits with message:
-```
-📝 docs: update changelog for v2.0.0
+Current version: 1.0.0
+Analyzing changes since last release...
+
+Proposed version: 1.1.0 (MINOR)
+Detected changes:
+- Added: New dashboard feature
+- Changed: Improved performance metrics
+- Fixed: Navigation bug on mobile
+
+No files will be modified (preview mode)
 ```

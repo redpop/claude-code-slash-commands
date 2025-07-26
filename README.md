@@ -47,25 +47,25 @@ git pull
 
 <!-- COMMANDS:START - DO NOT EDIT -->
 
-### ai Commands
+### Ai Commands
 
 | Command | Description | Options |
 |---------|-------------|---------|
 | `/prefix:ai:handoff` | Documents current problem context for handoff to another AI assistant | `output-file` |
 
 
-### git Commands
+### Git Commands
 
 | Command | Description | Options |
 |---------|-------------|---------|
 | `/prefix:git:commit` | Creates structured Git commits with Conventional Commit format and emojis | `--no-verify`, `--fast` |
 
 
-### project Commands
+### Project Commands
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `/prefix:project:changelog` | Manages CHANGELOG.md entries following Keep a Changelog format with version management | `<version>`, `<change_type>`, `<message>`, `--commit`, `--update-version` |
+| `/prefix:project:changelog` | AI-powered CHANGELOG.md management that automatically determines version based on changes | `--analyze`, `--commit`, `--update-version` |
 
 <!-- COMMANDS:END -->
 

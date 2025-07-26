@@ -10,11 +10,13 @@ This command helps you create well-formatted commits with conventional commit me
 ## Usage
 
 To create a commit, just type:
+
 ```
 /commit
 ```
 
 Or with options:
+
 ```
 /commit --no-verify      # Skip pre-commit checks
 /commit --fast           # Fast mode: auto-select first suggestion
@@ -24,6 +26,7 @@ Or with options:
 ## What This Command Does
 
 ### Standard Mode (default):
+
 1. Unless specified with `--no-verify`, automatically runs pre-commit checks:
    - `pnpm lint` to ensure code quality
    - `pnpm build` to verify the build succeeds
@@ -37,7 +40,9 @@ Or with options:
 8. No Claude co-authorship footer is added
 
 ### Fast Mode (--fast):
+
 When using `--fast` option, the workflow changes:
+
 1. Pre-commit checks run unless `--no-verify` is also specified
 2. Checks which files are staged (requires files to be already staged)
 3. Performs a `git diff --cached` to understand staged changes
@@ -140,6 +145,7 @@ When analyzing the diff, consider splitting commits based on these criteria:
 ## Examples
 
 Good commit messages:
+
 - ✨ feat: add user authentication system
 - 🐛 fix: resolve memory leak in rendering process
 - 📝 docs: update API documentation with new endpoints
@@ -158,6 +164,7 @@ Good commit messages:
 - ♿️ feat: improve form accessibility for screen readers
 
 Example of splitting commits:
+
 - First commit: ✨ feat: add new solc version type definitions
 - Second commit: 📝 docs: update documentation for new solc versions
 - Third commit: 🔧 chore: update package.json dependencies
@@ -178,6 +185,7 @@ Example of splitting commits:
 ## Important Notes
 
 ### Standard Mode:
+
 - By default, pre-commit checks (`pnpm lint`, `pnpm build`, `pnpm generate:docs`) will run to ensure code quality
 - If these checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
 - If specific files are already staged, the command will only commit those files
@@ -189,6 +197,7 @@ Example of splitting commits:
 - No Claude co-authorship footer is added
 
 ### Fast Mode (--fast):
+
 - Pre-commit checks still run by default (use `--no-verify` to skip)
 - Files must be already staged - no automatic staging
 - Generates exactly 3 commit message suggestions
