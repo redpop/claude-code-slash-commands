@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - ✨ Create command meta-command - helps create new slash commands with proper structure and documentation
 
+### Changed
+
+- 🔄 Create command now uses AI-powered natural language processing - describe what you want and AI generates the complete command
+
 ## [1.3.0] - 2025-01-26
 
 ### Added

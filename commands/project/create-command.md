@@ -1,123 +1,115 @@
 ---
-description: Create new slash commands with proper structure and documentation
-argument-hint: [command-name] [--category=<category>] [--update-readme]
+description: Create new slash commands from natural language descriptions
+argument-hint: [description of what you want the command to do]
 ---
 
 # Claude Command: Create Command
 
-This meta-command helps you create new slash commands for this repository by guiding you through the creation process and ensuring proper structure and documentation.
+This meta-command creates new slash commands based on your natural language description. Simply describe what you want the command to do, and I'll handle the rest - suggesting a name, choosing the right category, and generating the complete command file.
 
 ## Usage
 
 ```
-/create-command                              # Interactive mode - guides through creation
-/create-command my-awesome-tool              # Create with suggested name
-/create-command --category=git               # Pre-select category
-/create-command my-tool --update-readme      # Auto-update README after creation
+/create-command I need a command that finds all TODO comments in my code
+/create-command Create something that validates JSON files and fixes formatting
+/create-command A tool to analyze Python imports and find unused ones
 ```
-
-### Arguments
-
-- `command-name`: Optional name for the new command (lowercase with hyphens)
-- `--category=<category>`: Pre-select command category (git, project, code, ai, etc.)
-- `--update-readme`: Automatically run update-readme.sh after creation
 
 ## What This Command Does
 
-1. **Interactive Command Creation**:
-   - Asks for command name if not provided
-   - Helps determine appropriate category
-   - Gathers command description and purpose
-   - Collects argument specifications
-   - Builds comprehensive command documentation
+1. **Natural Language Understanding**:
+   - You describe what you want in plain language
+   - I analyze your description to understand the purpose
+   - Extract key functionality and requirements
+   - Identify the type of command needed
 
-2. **Category Selection**:
-   - Lists existing categories from `commands/` directory
-   - Suggests appropriate category based on command purpose
-   - Allows creation of new categories if needed
-   - Ensures consistent organization
+2. **Intelligent Command Design**:
+   - Suggest an appropriate command name
+   - Determine the best category (git, code, project, ai, etc.)
+   - Identify necessary arguments and options
+   - Choose the right template structure
 
-3. **Template Generation**:
-   - Creates properly formatted markdown file
-   - Includes required YAML frontmatter
-   - Adds standard sections based on command type
-   - Follows repository conventions
+3. **Automatic File Generation**:
+   - Create the complete command file
+   - Include all necessary sections
+   - Add relevant examples and documentation
+   - Follow repository conventions
 
-4. **Documentation Update**:
-   - Optionally runs `./scripts/update-readme.sh`
-   - Ensures README reflects new command
-   - Maintains alphabetical ordering
-   - Preserves existing documentation
+4. **Interactive Refinement** (only when needed):
+   - Ask for clarification if description is ambiguous
+   - Confirm command name if multiple options exist
+   - Verify category choice for edge cases
 
-## Command Categories
+## Workflow Examples
 
-### Existing Categories
-- **git**: Version control operations (commit, branch, merge)
-- **project**: Project management (changelog, documentation, setup)
-- **code**: Code quality and analysis (shellcheck, lint, format)
-- **ai**: AI-assisted tasks (handoff, review, generate)
-
-### Creating New Categories
-New categories should be:
-- Lowercase, single word preferred
-- Descriptive of command group
-- Consistent with existing patterns
-- Created only when necessary
-
-## Interactive Workflow
-
-### Step 1: Command Name
+### Example 1: Finding TODOs
 ```
-🎯 What should the new command be called?
-Enter command name (lowercase-with-hyphens): analyze-dependencies
+You: "I need a command that finds all TODO comments in my code"
+
+Claude: Based on your description, I'll create:
+- Command name: `find-todos`
+- Category: `code` (code analysis)
+- Arguments: `[--format=<format>] [--include-fixme] [path]`
+
+Creating `commands/code/find-todos.md`...
+✓ Command created successfully!
 ```
 
-### Step 2: Category Selection
+### Example 2: Git Workflow
 ```
-📁 Select or create a category:
+You: "Create a command that stashes changes, pulls latest, and reapplies the stash"
 
-Existing categories:
-1. git - Version control commands
-2. project - Project management commands
-3. code - Code quality commands
-4. ai - AI-assisted commands
+Claude: I'll create:
+- Command name: `sync-with-stash`
+- Category: `git` (version control)
+- Arguments: `[--branch=<branch>] [--force]`
 
-Enter number or new category name: code
-```
-
-### Step 3: Command Description
-```
-📝 Provide a brief description (for README):
-Description: Analyze and visualize project dependencies
+Creating `commands/git/sync-with-stash.md`...
+✓ Command created successfully!
 ```
 
-### Step 4: Argument Specification
+### Example 3: Project Setup
 ```
-🔧 Does this command accept arguments? (y/n): y
+You: "I want something that sets up a new TypeScript project with all my usual configs"
 
-Argument hint (e.g., [--flag] [path]): [--tree] [--outdated] [--security]
-```
+Claude: I'll create:
+- Command name: `setup-typescript`
+- Category: `project` (project management)
+- Arguments: `[project-name] [--strict] [--with-tests]`
 
-### Step 5: Command Purpose
-```
-🎯 What is the main purpose of this command?
-
-1. Analysis/Reporting - Gather information and generate reports
-2. Code Modification - Make changes to files
-3. Workflow Automation - Orchestrate multiple steps
-4. Development Tool - Assist with development tasks
-5. Other - Custom purpose
-
-Select purpose (1-5): 1
+Creating `commands/project/setup-typescript.md`...
+✓ Command created successfully!
 ```
 
-### Step 6: Template Generation
-Based on selections, generates appropriate template with:
-- Frontmatter metadata
-- Usage examples
-- Workflow steps
-- Best practices
-- Error handling
+## How It Works
+
+### 1. Description Analysis
+When you provide a description, I analyze it for:
+- **Action verbs**: find, create, analyze, setup, validate
+- **Target objects**: TODOs, imports, dependencies, files
+- **Context clues**: git, project, code quality, automation
+- **Requirements**: specific tools, frameworks, or patterns
+
+### 2. Command Naming
+I generate names that are:
+- Clear and descriptive
+- Action-oriented (verb-noun format)
+- Consistent with existing commands
+- Easy to remember and type
+
+### 3. Category Selection
+Categories are chosen based on:
+- Primary function of the command
+- Similar existing commands
+- Common usage patterns
+- Repository organization
+
+### 4. Template Selection
+Different templates for different purposes:
+- **Analysis commands**: Include reporting sections
+- **Modification commands**: Include safety checks
+- **Workflow commands**: Include step tracking
+- **Tool commands**: Include configuration options
 
 ## Template Structure
 
@@ -202,34 +194,30 @@ Includes additional sections:
 - Progress Tracking
 - Integration Points
 
-## Examples
+## AI-Powered Workflow
 
-### Example 1: Creating a Git Command
-```
-/create-command git-sync --category=git
+### Natural Language Processing
+I understand various ways to describe commands:
+- "Find all X in Y"
+- "Create a tool that..."
+- "I need something to..."
+- "Automate the process of..."
+- "Check if..." / "Validate..."
+- "Generate..." / "Build..."
 
-Creates: commands/git/git-sync.md
-Purpose: Synchronize local and remote branches
-```
+### Smart Suggestions
+Based on your description, I'll:
+1. Propose the most fitting command name
+2. Explain why I chose that name
+3. Show the category and structure
+4. Create the file immediately if you agree
+5. Offer alternatives if you want changes
 
-### Example 2: Creating an Analysis Tool
-```
-/create-command dependency-check
-
-Interactive flow:
-- Category: code
-- Description: Analyze and report on project dependencies
-- Arguments: [--tree] [--outdated] [--security]
-- Purpose: Analysis/Reporting
-```
-
-### Example 3: Creating a New Category
-```
-/create-command test-runner
-
-When prompted for category, enter: testing
-Creates: commands/testing/test-runner.md
-```
+### Minimal Interaction
+The goal is to minimize back-and-forth:
+- Clear descriptions = immediate creation
+- Ambiguous requests = focused clarification
+- Complex workflows = step-by-step confirmation
 
 ## Post-Creation Steps
 
@@ -278,24 +266,26 @@ commands/
 
 ## Advanced Features
 
-### Template Customization
-The command adapts templates based on:
-- Command purpose and type
-- Argument complexity
-- Category conventions
-- Existing patterns in category
+### Context-Aware Generation
+I analyze your description to determine:
+- **Command Type**: Analysis, modification, automation, or utility
+- **Scope**: File-level, project-level, or system-level
+- **Dependencies**: Required tools or frameworks
+- **Safety Requirements**: Backup needs, validation steps
 
-### Smart Suggestions
-- Suggests categories based on command name
-- Recommends argument patterns
-- Proposes workflow structures
-- Identifies similar existing commands
+### Intelligent Defaults
+Based on patterns in the repository:
+- Common argument patterns for similar commands
+- Standard error handling approaches
+- Typical workflow structures
+- Documentation style and depth
 
-### Validation
-- Checks for duplicate command names
-- Validates category names
-- Ensures proper markdown format
-- Verifies frontmatter structure
+### Learning from Examples
+I reference existing commands to ensure consistency:
+- Naming conventions in the category
+- Argument styles and formats
+- Documentation patterns
+- Implementation approaches
 
 ## Error Handling
 
@@ -309,31 +299,43 @@ The command handles:
 
 ## Best Practices
 
-### Command Design
-1. **Single Purpose**: Each command should do one thing well
-2. **Clear Naming**: Use descriptive, action-oriented names
-3. **Consistent Arguments**: Follow repository patterns
-4. **Comprehensive Docs**: Include all necessary information
+### For Users
+1. **Be Specific**: The more details you provide, the better the command
+2. **Include Context**: Mention tools, languages, or frameworks involved
+3. **Describe the Goal**: What problem are you trying to solve?
+4. **Mention Edge Cases**: Any special scenarios to handle?
 
-### Category Organization
-1. **Logical Grouping**: Commands with similar purposes
-2. **Avoid Proliferation**: Reuse existing categories when possible
-3. **Clear Boundaries**: Distinct purpose for each category
+### Examples of Good Descriptions
+✅ "Find all console.log statements in JavaScript files and offer to remove them"
+✅ "Validate Docker Compose files and check if all referenced images exist"
+✅ "Generate a weekly report of git commits grouped by author"
 
-### Documentation Quality
-1. **User-Focused**: Write for the end user
-2. **Complete Examples**: Show real usage scenarios
-3. **Error Guidance**: Help users troubleshoot
-4. **Maintenance Notes**: Include update/modification hints
+### Examples of Descriptions That Need Clarification
+❓ "Make a cleanup tool" → What should it clean up?
+❓ "Something for testing" → What kind of testing? Unit? Integration?
+❓ "Fix formatting" → Which files? What formatting rules?
 
 ## Important Notes
 
-- Generated commands follow repository conventions automatically
-- Templates are starting points - customize for specific needs
-- The `$ARGUMENTS` placeholder receives user input after command invocation
-- All paths in the command file should use the prefix placeholder
-- Remember to test commands after creation
-- Use --update-readme flag for automatic documentation updates
-- Commands should be self-contained with all necessary context
-- Follow existing patterns in the target category
-- Consider CI/CD integration when designing commands
+- This command uses AI to understand your intent - be clear and specific
+- The generated command will follow all repository conventions
+- You can always edit the generated file if you need customizations
+- Test the command after creation to ensure it works as expected
+- Run `./scripts/update-readme.sh` to update documentation
+- Each command should solve a real problem you face repeatedly
+
+## Quick Start Examples
+
+```bash
+# Simple analysis command
+/create-command Find all hardcoded API keys in the codebase
+
+# Complex workflow
+/create-command Automate the release process including version bump, changelog, and git tag
+
+# Development tool
+/create-command Set up pre-commit hooks for Python with black, isort, and mypy
+
+# Utility command
+/create-command Convert all PNG images to WebP format with optimization
+```
