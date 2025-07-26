@@ -10,11 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2025-01-26
 
 ### Added
+
 - ✨ Git sparse checkout for installations - enables simple updates via 'git pull'
 
 ### Changed
+
 - 🔄 Installation script now creates proper Git repositories instead of copying files
 - 🔄 Update process simplified to use native Git commands
 
 ### Fixed
+
 - 🐛 Update instructions in README now reflect actual Git-based workflow
+
+[Unreleased]: https://github.com/redpop/claude-code-slash-commands/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/redpop/claude-code-slash-commands/releases/tag/v1.1.0
