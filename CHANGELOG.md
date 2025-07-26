@@ -1,0 +1,20 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [1.1.0] - 2025-01-26
+
+### Added
+- ✨ Git sparse checkout for installations - enables simple updates via 'git pull'
+
+### Changed
+- 🔄 Installation script now creates proper Git repositories instead of copying files
+- 🔄 Update process simplified to use native Git commands
+
+### Fixed
+- 🐛 Update instructions in README now reflect actual Git-based workflow
