@@ -124,7 +124,7 @@ if [ ! -d "$INSTALL_PATH/.git" ]; then
         rmdir commands 2>/dev/null || true
         
         # Remove all other files/directories that shouldn't be here
-        rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore 2>/dev/null || true
+        rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore CHANGELOG.md 2>/dev/null || true
         
         # Update sparse checkout to track the new structure
         echo "/*" > .git/info/sparse-checkout
@@ -134,6 +134,7 @@ if [ ! -d "$INSTALL_PATH/.git" ]; then
         echo "!scripts" >> .git/info/sparse-checkout
         echo "!CLAUDE.md" >> .git/info/sparse-checkout
         echo "!.gitignore" >> .git/info/sparse-checkout
+        echo "!CHANGELOG.md" >> .git/info/sparse-checkout
         echo "!commands" >> .git/info/sparse-checkout
         
         # Create a custom git hook to handle updates
@@ -160,7 +161,7 @@ if [ -d "commands" ]; then
 fi
 
 # Clean up any unwanted files
-rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore 2>/dev/null || true
+rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore CHANGELOG.md 2>/dev/null || true
 EOF
         chmod +x .git/hooks/post-merge
         
