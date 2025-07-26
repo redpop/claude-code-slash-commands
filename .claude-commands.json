@@ -1,0 +1,12 @@
+{
+  "repo_owner": "redpop",
+  "repo_name": "claude-code-slash-commands",
+  "default_branch": "main",
+  "description": "Centralized repository for reusable Claude Code slash commands",
+  "version": "1.7.0",
+  "fork_config": {
+    "auto_update_urls": true,
+    "preserve_original_references": false,
+    "custom_prefix_support": true
+  }
+}

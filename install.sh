@@ -12,15 +12,88 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Default values
-DEFAULT_REPO_URL="https://github.com/redpop/claude-code-slash-commands.git"
-REPO_URL="${CLAUDE_COMMANDS_REPO_URL:-$DEFAULT_REPO_URL}"
-CLAUDE_COMMANDS_DIR="$HOME/.claude/commands"
+# Function to extract repository info from git URL
+get_repo_info() {
+    local url="$1"
+    local owner=""
+    local name=""
+    
+    # Remove trailing .git if present
+    url="${url%.git}"
+    
+    # Handle different URL formats
+    if [[ "$url" =~ ^https?://github\.com/([^/]+)/([^/]+) ]]; then
+        # HTTPS GitHub URL
+        owner="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
+    elif [[ "$url" =~ ^git@github\.com:([^/]+)/([^/]+) ]]; then
+        # SSH GitHub URL
+        owner="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
+    elif [[ "$url" =~ ^https?://gitlab\.com/([^/]+)/([^/]+) ]]; then
+        # HTTPS GitLab URL
+        owner="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
+    elif [[ "$url" =~ ^git@gitlab\.com:([^/]+)/([^/]+) ]]; then
+        # SSH GitLab URL
+        owner="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
+    elif [[ "$url" =~ ^https?://bitbucket\.org/([^/]+)/([^/]+) ]]; then
+        # HTTPS Bitbucket URL
+        owner="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
+    elif [[ "$url" =~ ^git@bitbucket\.org:([^/]+)/([^/]+) ]]; then
+        # SSH Bitbucket URL
+        owner="${BASH_REMATCH[1]}"
+        name="${BASH_REMATCH[2]}"
+    else
+        # Generic pattern for other git hosts
+        # Try to extract from path-like structure
+        if [[ "$url" =~ /([^/]+)/([^/]+)/?$ ]]; then
+            owner="${BASH_REMATCH[1]}"
+            name="${BASH_REMATCH[2]}"
+        fi
+    fi
+    
+    echo "$owner|$name"
+}
 
-# Allow overriding via environment variable
+# Function to get repository URL from current script location
+get_script_repo_url() {
+    # If we're running from a local file, try to detect git remote
+    if [ -f "$0" ] && [ -d "$(dirname "$0")/.git" ]; then
+        local script_dir
+        script_dir="$(cd "$(dirname "$0")" && pwd)"
+        cd "$script_dir"
+        if git remote get-url origin 2>/dev/null; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+# Detect repository URL
 if [ -n "$CLAUDE_COMMANDS_REPO_URL" ]; then
-    print_info "Using custom repository: $CLAUDE_COMMANDS_REPO_URL"
+    # Use environment variable if set
+    REPO_URL="$CLAUDE_COMMANDS_REPO_URL"
+    REPO_SOURCE="environment variable"
+elif script_url=$(get_script_repo_url); then
+    # Use detected URL from script location
+    REPO_URL="$script_url"
+    REPO_SOURCE="script location"
+else
+    # Fall back to default
+    REPO_URL="https://github.com/redpop/claude-code-slash-commands.git"
+    REPO_SOURCE="default"
 fi
+
+# Extract repository info
+REPO_INFO=$(get_repo_info "$REPO_URL")
+REPO_OWNER="${REPO_INFO%|*}"
+REPO_NAME="${REPO_INFO#*|}"
+
+# Default values
+CLAUDE_COMMANDS_DIR="$HOME/.claude/commands"
 
 # Function to print colored output
 print_error() {
@@ -34,6 +107,11 @@ print_success() {
 print_info() {
     echo -e "${YELLOW}→ $1${NC}"
 }
+
+# Show repository information
+if [ "$REPO_SOURCE" != "default" ] || [ -n "$CLAUDE_COMMANDS_REPO_URL" ]; then
+    print_info "Using repository: $REPO_URL (from $REPO_SOURCE)"
+fi
 
 # Check if prefix is provided
 if [ -z "$1" ]; then
@@ -153,7 +231,7 @@ if [ ! -d "$INSTALL_PATH/.git" ]; then
         cat > .git/hooks/post-merge << 'HOOKEOF'
 #!/bin/bash
 # Post-merge hook to handle directory structure after pull
-# Hook version: 4
+# Hook version: 5
 
 # Function to get list of command files from git
 get_git_command_files() {
@@ -231,9 +309,28 @@ check_hook_version() {
         
         if [ -n "$latest_version" ] && [ -n "$current_version" ] && [ "$latest_version" != "$current_version" ]; then
             # Get repository URL from git config or remote
-            local repo_url=$(git config claude.repo-url || git config --get remote.origin.url || echo "https://github.com/redpop/claude-code-slash-commands.git")
-            # Convert git URL to https URL for raw content
-            local raw_url=$(echo "$repo_url" | sed -e 's/\.git$//' -e 's/github\.com/raw.githubusercontent.com/' -e 's/$/\/main/')
+            local repo_url=$(git config claude.repo-url || git config --get remote.origin.url)
+            
+            # Extract owner and repo name for URL construction
+            local repo_info owner repo_name
+            
+            # Function to extract repo info (simplified version for hook)
+            if [[ "$repo_url" =~ github\.com[:/]([^/]+)/([^/.]+) ]]; then
+                owner="${BASH_REMATCH[1]}"
+                repo_name="${BASH_REMATCH[2]}"
+                local raw_url="https://raw.githubusercontent.com/$owner/$repo_name/main"
+            elif [[ "$repo_url" =~ gitlab\.com[:/]([^/]+)/([^/.]+) ]]; then
+                owner="${BASH_REMATCH[1]}"
+                repo_name="${BASH_REMATCH[2]}"
+                local raw_url="https://gitlab.com/$owner/$repo_name/-/raw/main"
+            elif [[ "$repo_url" =~ bitbucket\.org[:/]([^/]+)/([^/.]+) ]]; then
+                owner="${BASH_REMATCH[1]}"
+                repo_name="${BASH_REMATCH[2]}"
+                local raw_url="https://bitbucket.org/$owner/$repo_name/raw/main"
+            else
+                # Fallback to simple transformation
+                local raw_url=$(echo "$repo_url" | sed -e 's/\.git$//' -e 's/$/\/raw\/main/')
+            fi
             
             echo ""
             echo "⚠️  Hook Update Available!"
@@ -295,7 +392,24 @@ echo "To use these commands in Claude Code, type '/' followed by the command nam
 echo
 echo "To update in the future:"
 echo "  cd $INSTALL_PATH && git pull"
-echo "  # or run this install script again:"
-echo "  curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- $PREFIX"
+
+# Only show curl command if we can determine the raw URL
+if [ -n "$REPO_OWNER" ] && [ -n "$REPO_NAME" ]; then
+    # Construct raw URL based on detected platform
+    if [[ "$REPO_URL" =~ github\.com ]]; then
+        RAW_BASE_URL="https://raw.githubusercontent.com/$REPO_OWNER/$REPO_NAME/main"
+    elif [[ "$REPO_URL" =~ gitlab\.com ]]; then
+        RAW_BASE_URL="https://gitlab.com/$REPO_OWNER/$REPO_NAME/-/raw/main"
+    elif [[ "$REPO_URL" =~ bitbucket\.org ]]; then
+        RAW_BASE_URL="https://bitbucket.org/$REPO_OWNER/$REPO_NAME/raw/main"
+    else
+        # Generic pattern - might not work for all hosts
+        RAW_BASE_URL="${REPO_URL%.git}/raw/main"
+    fi
+    
+    echo "  # or run this install script again:"
+    echo "  curl -fsSL $RAW_BASE_URL/install.sh | bash -s -- $PREFIX"
+fi
+
 echo
 print_success "Happy coding with Claude Code! 🚀"

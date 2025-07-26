@@ -7,6 +7,15 @@ argument-hint: [--all] [--check-only]
 
 This command updates the git hooks in your Claude command installations to the latest version. This is useful when the repository's hook implementation has been improved or fixed.
 
+## Fork Support
+
+This command fully supports forked repositories. The update process automatically detects:
+- Your fork's repository URL from the local git configuration
+- The appropriate raw content URL for GitHub, GitLab, or Bitbucket
+- Custom repository URLs set via the CLAUDE_COMMANDS_REPO_URL environment variable
+
+No manual URL updates are needed when using a fork.
+
 ## Usage
 
 ```
@@ -136,10 +145,12 @@ After each `git pull`, if your hooks are outdated, you'll see:
 Your git hooks are version 1, but version 2 is available.
 Run the following command to update your hooks:
 
-  curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/scripts/update-hooks.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/[owner]/[repo]/main/scripts/update-hooks.sh | bash
 
 Or manually reinstall with the latest install.sh
 ```
+
+Note: The actual URL shown will automatically match your fork's repository URL.
 
 ## Manual Update Methods
 
@@ -148,16 +159,26 @@ Or manually reinstall with the latest install.sh
 /update-hooks
 ```
 
-### Method 2: Using the update script directly
+### Method 2: Using the update script from the repository
 ```bash
-curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/scripts/update-hooks.sh | bash
+# The update script dynamically detects your repository URL from the local git config
+# Replace [owner] and [repo] with your fork's details if different
+curl -fsSL https://raw.githubusercontent.com/[owner]/[repo]/main/scripts/update-hooks.sh | bash
+
+# Or if you've set CLAUDE_COMMANDS_REPO_URL environment variable:
+curl -fsSL $CLAUDE_COMMANDS_REPO_URL/raw/main/scripts/update-hooks.sh | bash
 ```
 
-### Method 3: Reinstalling
+Note: The update script automatically detects repository URLs from GitHub, GitLab, and Bitbucket.
+
+### Method 3: Reinstalling from your fork
 ```bash
 cd ~/.claude/commands
 rm -rf myprefix
-curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
+# If you have forked the repository, use your fork URL:
+curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_FORK_NAME/main/install.sh | bash -s -- myprefix
+# Or use the CLAUDE_COMMANDS_REPO_URL environment variable:
+CLAUDE_COMMANDS_REPO_URL=https://github.com/YOUR_USERNAME/YOUR_FORK_NAME.git curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_FORK_NAME/main/install.sh | bash -s -- myprefix
 ```
 
 ## Rollback

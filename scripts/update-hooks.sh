@@ -59,9 +59,30 @@ TEMP_FILE=$(mktemp)
 trap 'rm -f $TEMP_FILE' EXIT
 
 # Get repository URL from git config or remote
-REPO_URL=$(git config claude.repo-url || git config --get remote.origin.url || echo "https://github.com/redpop/claude-code-slash-commands.git")
-# Convert git URL to https URL for raw content
-RAW_URL=$(echo "$REPO_URL" | sed -e 's/\.git$//' -e 's/github\.com/raw.githubusercontent.com/' -e 's/$/\/main/')
+REPO_URL=$(git config claude.repo-url || git config --get remote.origin.url)
+if [ -z "$REPO_URL" ]; then
+    print_error "Could not determine repository URL"
+    exit 1
+fi
+
+# Extract owner and repo name for URL construction
+if [[ "$REPO_URL" =~ github\.com[:/]([^/]+)/([^/.]+) ]]; then
+    OWNER="${BASH_REMATCH[1]}"
+    REPO_NAME="${BASH_REMATCH[2]}"
+    RAW_URL="https://raw.githubusercontent.com/$OWNER/$REPO_NAME/main"
+elif [[ "$REPO_URL" =~ gitlab\.com[:/]([^/]+)/([^/.]+) ]]; then
+    OWNER="${BASH_REMATCH[1]}"
+    REPO_NAME="${BASH_REMATCH[2]}"
+    RAW_URL="https://gitlab.com/$OWNER/$REPO_NAME/-/raw/main"
+elif [[ "$REPO_URL" =~ bitbucket\.org[:/]([^/]+)/([^/.]+) ]]; then
+    OWNER="${BASH_REMATCH[1]}"
+    REPO_NAME="${BASH_REMATCH[2]}"
+    RAW_URL="https://bitbucket.org/$OWNER/$REPO_NAME/raw/main"
+else
+    # Fallback - construct a generic raw URL
+    RAW_URL=$(echo "$REPO_URL" | sed -e 's/\.git$//' -e 's/$/\/raw\/main/')
+    print_info "Warning: Using generic raw URL construction, may not work for all git hosts"
+fi
 
 if curl -fsSL "${RAW_URL}/install.sh" -o "$TEMP_FILE"; then
     # Extract the hook content from install.sh

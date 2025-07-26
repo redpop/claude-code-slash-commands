@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2025-01-26
+
+### Added
+
+- ✨ Comprehensive fork support - installation scripts now automatically detect and use fork URLs
+- ✨ Repository configuration file (.claude-commands.json) for fork metadata
+- ✨ GitHub Actions workflow for automatic fork setup and configuration
+- ✨ Dynamic URL detection for multiple git platforms (GitHub, GitLab, Bitbucket)
+- ✨ Fork synchronization workflow with upstream repository
+
+### Changed
+
+- 🔄 Installation script now dynamically detects repository URLs instead of using hardcoded values
+- 🔄 Git hooks updated to version 5 with improved fork support
+- 🔄 Commands updated to use dynamic URL references instead of hardcoded repository paths
+- 🔄 README enhanced with comprehensive forking guide and best practices
+
+### Fixed
+
+- 🐛 Hardcoded repository URLs removed throughout the codebase for better fork flexibility
+
 ## [1.6.1] - 2025-01-26
 
 ### Fixed
@@ -74,6 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 🐛 Update instructions in README now reflect actual Git-based workflow
 
+[1.7.0]: https://github.com/redpop/claude-code-slash-commands/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/redpop/claude-code-slash-commands/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/redpop/claude-code-slash-commands/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/redpop/claude-code-slash-commands/compare/v1.4.0...v1.5.0
