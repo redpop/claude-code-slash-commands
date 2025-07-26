@@ -1,6 +1,6 @@
 ---
 description: Creates structured Git commits with Conventional Commit format and emojis
-argument-hint: [--no-verify] [--fast]
+argument-hint: [--no-verify] [--fast] [--push]
 ---
 
 # Claude Command: Commit
@@ -20,6 +20,8 @@ Or with options:
 ```
 /commit --no-verify      # Skip pre-commit checks
 /commit --fast           # Fast mode: auto-select first suggestion
+/commit --push           # Push to remote after commit
+/commit --fast --push    # Fast mode with automatic push
 /commit --fast --no-verify  # Combine fast mode with no verification
 ```
 
@@ -38,6 +40,7 @@ Or with options:
 6. If multiple distinct changes are detected, suggests breaking the commit into multiple smaller commits
 7. For each commit (or the single commit if not split), creates a commit message using emoji conventional commit format
 8. No Claude co-authorship footer is added
+9. If `--push` is specified, automatically pushes to the remote repository
 
 ### Fast Mode (--fast):
 
@@ -50,6 +53,7 @@ When using `--fast` option, the workflow changes:
 5. Automatically selects the first suggestion without user confirmation
 6. Immediately executes `git commit -m` with the selected message
 7. No Claude co-authorship footer is added
+8. If `--push` is specified, automatically pushes to the remote repository
 
 ## Best Practices for Commits
 
@@ -181,6 +185,10 @@ Example of splitting commits:
   - Requires files to be already staged
   - No automatic staging of unstaged files
   - No Claude co-authorship footer
+- `--push`: Automatically push to remote repository after successful commit
+  - Executes `git push` after the commit is created
+  - Works with both standard and fast mode
+  - Shows push progress and result
 
 ## Important Notes
 
@@ -195,6 +203,7 @@ Example of splitting commits:
 - If suggesting multiple commits, it will help you stage and commit the changes separately
 - Always reviews the commit diff to ensure the message matches the changes
 - No Claude co-authorship footer is added
+- If `--push` is used, the commit will be pushed to the remote repository automatically
 
 ### Fast Mode (--fast):
 
@@ -205,3 +214,14 @@ Example of splitting commits:
 - No interactive prompts or confirmations
 - Ideal for simple, straightforward commits where you trust the auto-generated message
 - No Claude co-authorship footer is added
+- Can be combined with `--push` for a complete commit-and-push workflow
+
+### Push Mode (--push):
+
+When using `--push` option:
+- After successful commit creation, automatically executes `git push`
+- Works with both standard and fast mode
+- Can be combined with other options: `--fast --push` or `--no-verify --push`
+- Shows push progress and remote branch status
+- If push fails, the commit remains local and error details are shown
+- Useful for quick iterations and continuous deployment workflows

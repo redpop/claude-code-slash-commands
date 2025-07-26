@@ -63,7 +63,7 @@ Both methods will preserve any local changes you've made to the commands.
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `/prefix:git:commit` | Creates structured Git commits with Conventional Commit format and emojis | `--no-verify`, `--fast` |
+| `/prefix:git:commit` | Creates structured Git commits with Conventional Commit format and emojis | `--no-verify`, `--fast`, `--push` |
 
 
 ### Project Commands
