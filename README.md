@@ -59,6 +59,13 @@ Both methods will preserve any local changes you've made to the commands.
 | `/prefix:ai:handoff` | Documents current problem context for handoff to another AI assistant | `output-file` |
 
 
+### Analysis Commands
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `/prefix:analysis:five-whys` | Apply the Five Whys root cause analysis technique to investigate issues | `issue_description` |
+
+
 ### Code Commands
 
 | Command | Description | Options |
