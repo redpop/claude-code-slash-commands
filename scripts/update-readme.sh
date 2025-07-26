@@ -13,8 +13,10 @@ NC='\033[0m' # No Color
 # Function to capitalize first letter of a word
 capitalize_first() {
     local word="$1"
-    local first_letter=$(echo "$word" | cut -c1 | tr '[:lower:]' '[:upper:]')
-    local rest=$(echo "$word" | cut -c2-)
+    local first_letter
+    local rest
+    first_letter=$(echo "$word" | cut -c1 | tr '[:lower:]' '[:upper:]')
+    rest=$(echo "$word" | cut -c2-)
     echo "${first_letter}${rest}"
 }
 

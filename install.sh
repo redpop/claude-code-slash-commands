@@ -127,15 +127,17 @@ if [ ! -d "$INSTALL_PATH/.git" ]; then
         rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore CHANGELOG.md 2>/dev/null || true
         
         # Update sparse checkout to track the new structure
-        echo "/*" > .git/info/sparse-checkout
-        echo "!README.md" >> .git/info/sparse-checkout
-        echo "!LICENSE" >> .git/info/sparse-checkout
-        echo "!install.sh" >> .git/info/sparse-checkout
-        echo "!scripts" >> .git/info/sparse-checkout
-        echo "!CLAUDE.md" >> .git/info/sparse-checkout
-        echo "!.gitignore" >> .git/info/sparse-checkout
-        echo "!CHANGELOG.md" >> .git/info/sparse-checkout
-        echo "!commands" >> .git/info/sparse-checkout
+        {
+            echo "/*"
+            echo "!README.md"
+            echo "!LICENSE"
+            echo "!install.sh"
+            echo "!scripts"
+            echo "!CLAUDE.md"
+            echo "!.gitignore"
+            echo "!CHANGELOG.md"
+            echo "!commands"
+        } > .git/info/sparse-checkout
         
         # Create a custom git hook to handle updates
         cat > .git/hooks/post-merge << 'EOF'
