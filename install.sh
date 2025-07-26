@@ -13,8 +13,14 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Default values
-REPO_URL="https://github.com/redpop/claude-code-slash-commands.git"
+DEFAULT_REPO_URL="https://github.com/redpop/claude-code-slash-commands.git"
+REPO_URL="${CLAUDE_COMMANDS_REPO_URL:-$DEFAULT_REPO_URL}"
 CLAUDE_COMMANDS_DIR="$HOME/.claude/commands"
+
+# Allow overriding via environment variable
+if [ -n "$CLAUDE_COMMANDS_REPO_URL" ]; then
+    print_info "Using custom repository: $CLAUDE_COMMANDS_REPO_URL"
+fi
 
 # Function to print colored output
 print_error() {
@@ -140,10 +146,14 @@ if [ ! -d "$INSTALL_PATH/.git" ]; then
             echo "commands/**"
         } > .git/info/sparse-checkout
         
+        # Store the repository URL for hook usage
+        git config claude.repo-url "$REPO_URL"
+        
         # Create a custom git hook to handle updates
         cat > .git/hooks/post-merge << 'HOOKEOF'
 #!/bin/bash
 # Post-merge hook to handle directory structure after pull
+# Hook version: 3
 
 # Function to get list of command files from git
 get_git_command_files() {
@@ -207,6 +217,38 @@ rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore CHANGELOG.md 2>
 
 # Step 4: Ensure sparse-checkout is properly configured
 git sparse-checkout reapply 2>/dev/null || true
+
+# Step 5: Check if hooks need updating
+check_hook_version() {
+    local current_version=$(grep "# Hook version:" "$1" 2>/dev/null | sed 's/.*: //')
+    local repo_file="install.sh"
+    
+    # Check if install.sh exists in git
+    if git show HEAD:install.sh >/dev/null 2>&1; then
+        # Extract hook version from repository's install.sh
+        local latest_version=$(git show HEAD:install.sh | grep -A5 "cat > .git/hooks/post-merge" | grep "# Hook version:" | head -1 | sed 's/.*: //')
+        
+        if [ -n "$latest_version" ] && [ -n "$current_version" ] && [ "$latest_version" != "$current_version" ]; then
+            # Get repository URL from git config or remote
+            local repo_url=$(git config claude.repo-url || git config --get remote.origin.url || echo "https://github.com/redpop/claude-code-slash-commands.git")
+            # Convert git URL to https URL for raw content
+            local raw_url=$(echo "$repo_url" | sed -e 's/\.git$//' -e 's/github\.com/raw.githubusercontent.com/' -e 's/$/\/main/')
+            
+            echo ""
+            echo "⚠️  Hook Update Available!"
+            echo "Your git hooks are version $current_version, but version $latest_version is available."
+            echo "Run the following command to update your hooks:"
+            echo ""
+            echo "  curl -fsSL ${raw_url}/scripts/update-hooks.sh | bash"
+            echo ""
+            echo "Or manually reinstall with the latest install.sh"
+            echo ""
+        fi
+    fi
+}
+
+# Check this hook's version
+check_hook_version "$0"
 HOOKEOF
         chmod +x .git/hooks/post-merge
         

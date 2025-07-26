@@ -10,8 +10,12 @@ Use the installation script to set up the commands with your desired prefix:
 # Install with your chosen prefix (e.g., "myprefix", "global", etc.)
 curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
 
-# Or from your own fork
-curl -fsSL https://raw.githubusercontent.com/YourUsername/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
+# Or from your own fork (automatic detection)
+export CLAUDE_COMMANDS_REPO_URL="https://github.com/YourUsername/your-fork.git"
+curl -fsSL https://raw.githubusercontent.com/YourUsername/your-fork/main/install.sh | bash -s -- myprefix
+
+# Or as a one-liner
+CLAUDE_COMMANDS_REPO_URL="https://github.com/YourUsername/your-fork.git" curl -fsSL https://raw.githubusercontent.com/YourUsername/your-fork/main/install.sh | bash -s -- myprefix
 ```
 
 The installation script will:
@@ -47,6 +51,28 @@ curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/m
 ```
 
 Both methods will preserve any local changes you've made to the commands.
+
+### Hook Updates
+
+Git hooks are versioned separately from commands. After a `git pull`, you may see a notification about available hook updates:
+
+```
+⚠️  Hook Update Available!
+Your git hooks are version 2, but version 3 is available.
+```
+
+To update hooks:
+```bash
+# Method 1: Use the update-hooks slash command
+/myprefix:project:update-hooks
+
+# Method 2: Run the update script directly
+cd ~/.claude/commands/myprefix
+./.git/hooks/post-merge  # This will show the update command
+
+# Method 3: Update all installations at once
+curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/scripts/update-hooks.sh | bash
+```
 
 ## Available Commands
 
@@ -87,6 +113,7 @@ Both methods will preserve any local changes you've made to the commands.
 | `/prefix:project:changelog` | AI-powered CHANGELOG.md management that automatically determines version based on changes | `--analyze`, `--commit`, `--update-version` |
 | `/prefix:project:create-command` | Create new slash commands from natural language descriptions | `description`, `of`, `what`, `you`, `want`, `the`, `command`, `to`, `do` |
 | `/prefix:project:update-docs` | Intelligently updates project documentation based on code changes and implementation status | `--scope=<type>`, `--analyze`, `--commit` |
+| `/prefix:project:update-hooks` | Update git hooks to the latest version in Claude command installations | `--all`, `--check-only` |
 
 <!-- COMMANDS:END -->
 
