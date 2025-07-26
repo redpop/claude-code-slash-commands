@@ -62,9 +62,17 @@ Each command is a Markdown file containing:
 
 The `install.sh` script handles:
 
-- Cloning repository to specified prefix location
-- Updating existing installations
+- Cloning repository using Git sparse checkout to specified prefix location
+- Creating a Git repository structure that only contains command files
+- Automatically updating existing installations via `git pull`
+- Handling migration from old non-Git installations
 - Listing available commands after installation
+
+Key features:
+- Uses Git sparse checkout to only track command files
+- Moves command files from `commands/` subdirectory to the root of the installation
+- Creates post-merge hooks to maintain structure during updates
+- Preserves local changes during updates using git stash
 
 Update the `REPO_URL` variable in `install.sh` when forking or moving the repository.
 
@@ -88,6 +96,16 @@ Changelog management command that:
 - Can automatically update version in package files
 - Includes emoji prefixes for change types
 - Optionally commits changes with conventional commit message
+
+### `/prefix:ai:handoff`
+
+AI context handoff command that:
+
+- Analyzes current problem state and generates comprehensive documentation
+- Creates markdown file suitable for sharing with other AI assistants
+- Includes code snippets, directory structure, and recent changes
+- Captures context of ongoing tasks and next steps
+- Useful for switching between AI assistants or documenting work state
 
 ## Important Notes
 

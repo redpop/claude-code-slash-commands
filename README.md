@@ -4,25 +4,21 @@ A centralized repository for reusable Claude Code slash commands that can be ins
 
 ## Installation
 
-### Method 1: Manual Clone
+Use the installation script to set up the commands with your desired prefix:
 
 ```bash
-# Clone the repository with your desired prefix
-git clone https://github.com/redpop/claude-code-slash-commands.git ~/.claude/commands/myprefix
-
-# Or fork and use your own repository
-git clone https://github.com/YourUsername/claude-code-slash-commands.git ~/.claude/commands/myprefix
-```
-
-### Method 2: Installation Script (Recommended)
-
-```bash
-# Download and run the installation script
+# Install with your chosen prefix (e.g., "myprefix", "global", etc.)
 curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
 
 # Or from your own fork
 curl -fsSL https://raw.githubusercontent.com/YourUsername/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
 ```
+
+The installation script will:
+- Clone the repository using Git sparse checkout
+- Set up only the command files in `~/.claude/commands/myprefix/`
+- Create a Git repository structure that allows easy updates
+- Display all available commands after installation
 
 ## Usage
 
@@ -36,12 +32,21 @@ After installation, all commands are available with your chosen prefix:
 
 ## Updates
 
-To update the commands to the latest version:
+Since the installation creates a Git repository, you can easily update your commands:
 
+### Method 1: Using Git (Recommended)
 ```bash
 cd ~/.claude/commands/myprefix
 git pull
 ```
+
+### Method 2: Re-run Installation Script
+```bash
+# The script automatically detects existing installations and updates them
+curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
+```
+
+Both methods will preserve any local changes you've made to the commands.
 
 ## Available Commands
 

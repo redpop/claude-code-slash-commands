@@ -51,74 +51,126 @@ if [ ! -d "$CLAUDE_COMMANDS_DIR" ]; then
     mkdir -p "$CLAUDE_COMMANDS_DIR"
 fi
 
-# Check if prefix directory already exists
-if [ -d "$INSTALL_PATH" ]; then
-    echo -e "${YELLOW}Warning: Directory $INSTALL_PATH already exists.${NC}"
-    read -p "Do you want to update it? (y/N) " -n 1 -r
+# Check if prefix directory already exists and is a git repository
+if [ -d "$INSTALL_PATH/.git" ]; then
+    print_info "Updating existing installation..."
+    cd "$INSTALL_PATH"
+    
+    # Stash any local changes
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        print_info "Stashing local changes..."
+        git stash push -m "Auto-stash before update"
+    fi
+    
+    # Pull latest changes
+    if git pull --ff-only origin main; then
+        print_success "Updated successfully!"
+        
+        # Check if there were stashed changes
+        if git stash list | grep -q "Auto-stash before update"; then
+            print_info "Reapplying local changes..."
+            git stash pop || print_error "Failed to reapply local changes. Check 'git stash list'"
+        fi
+    else
+        print_error "Failed to update. You may have local changes that conflict."
+        echo "Try resolving conflicts manually in: $INSTALL_PATH"
+        exit 1
+    fi
+elif [ -d "$INSTALL_PATH" ]; then
+    # Directory exists but is not a git repository
+    echo -e "${YELLOW}Warning: Directory $INSTALL_PATH exists but is not a git repository.${NC}"
+    echo "This appears to be an old installation. Would you like to replace it with a git-based installation?"
+    echo "This will enable easy updates with 'git pull' in the future."
+    read -p "Replace with git-based installation? (y/N) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        print_info "Updating existing installation..."
-        # Create temporary directory for update
-        TEMP_DIR=$(mktemp -d)
-        
-        # Clone latest version
-        if git clone "$REPO_URL" "$TEMP_DIR"; then
-            # Backup existing commands
-            if [ -d "$INSTALL_PATH" ]; then
-                rm -rf "$INSTALL_PATH"
-            fi
-            
-            # Copy only commands directory content
-            if [ -d "$TEMP_DIR/commands" ]; then
-                cp -r "$TEMP_DIR/commands/"* "$INSTALL_PATH/" 2>/dev/null || true
-                mkdir -p "$INSTALL_PATH"
-                cp -r "$TEMP_DIR/commands/"* "$INSTALL_PATH/"
-                print_success "Updated successfully!"
-            else
-                print_error "No commands directory found in repository"
-                rm -rf "$TEMP_DIR"
-                exit 1
-            fi
-        else
-            print_error "Failed to clone repository for update"
-            rm -rf "$TEMP_DIR"
-            exit 1
-        fi
-        
-        # Clean up
-        rm -rf "$TEMP_DIR"
+        print_info "Backing up existing installation..."
+        mv "$INSTALL_PATH" "${INSTALL_PATH}.backup"
+        print_info "Old installation backed up to: ${INSTALL_PATH}.backup"
     else
         print_info "Installation cancelled."
         exit 0
     fi
-else
-    # Clone the repository to temporary directory
-    TEMP_DIR=$(mktemp -d)
-    print_info "Cloning repository..."
+fi
+
+# Fresh installation
+if [ ! -d "$INSTALL_PATH/.git" ]; then
+    print_info "Installing commands to $INSTALL_PATH..."
     
-    if git clone "$REPO_URL" "$TEMP_DIR"; then
-        print_success "Repository cloned successfully!"
-        
-        # Create target directory and copy only commands
-        print_info "Installing commands to $INSTALL_PATH..."
-        mkdir -p "$INSTALL_PATH"
-        
-        if [ -d "$TEMP_DIR/commands" ]; then
-            cp -r "$TEMP_DIR/commands/"* "$INSTALL_PATH/"
-            print_success "Commands installed successfully!"
-        else
-            print_error "No commands directory found in repository"
-            rm -rf "$TEMP_DIR"
-            exit 1
-        fi
-    else
+    # Clone the full repository first
+    if ! git clone "$REPO_URL" "$INSTALL_PATH"; then
         print_error "Failed to clone repository"
-        rm -rf "$TEMP_DIR"
         exit 1
     fi
     
-    # Clean up
-    rm -rf "$TEMP_DIR"
+    cd "$INSTALL_PATH"
+    
+    # Enable sparse checkout
+    git config core.sparseCheckout true
+    
+    # Configure sparse checkout to only track commands directory
+    echo "commands/*" > .git/info/sparse-checkout
+    
+    # Re-read the tree with sparse checkout
+    git read-tree -m -u HEAD
+    
+    # Move commands content to root and remove everything else
+    if [ -d "commands" ]; then
+        # Move all content from commands/ to root
+        mv commands/* . 2>/dev/null || true
+        mv commands/.[^.]* . 2>/dev/null || true
+        
+        # Remove the now-empty commands directory
+        rmdir commands 2>/dev/null || true
+        
+        # Remove all other files/directories that shouldn't be here
+        rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore 2>/dev/null || true
+        
+        # Update sparse checkout to track the new structure
+        echo "/*" > .git/info/sparse-checkout
+        echo "!README.md" >> .git/info/sparse-checkout
+        echo "!LICENSE" >> .git/info/sparse-checkout
+        echo "!install.sh" >> .git/info/sparse-checkout
+        echo "!scripts" >> .git/info/sparse-checkout
+        echo "!CLAUDE.md" >> .git/info/sparse-checkout
+        echo "!.gitignore" >> .git/info/sparse-checkout
+        echo "!commands" >> .git/info/sparse-checkout
+        
+        # Create a custom git hook to handle updates
+        cat > .git/hooks/post-merge << 'EOF'
+#!/bin/bash
+# Post-merge hook to handle directory structure after pull
+
+# Check if commands directory exists after merge
+if [ -d "commands" ]; then
+    # Move content from commands/ to root
+    for item in commands/*; do
+        if [ -e "$item" ]; then
+            base_name=$(basename "$item")
+            # If directory already exists, merge content
+            if [ -d "$base_name" ]; then
+                cp -r "$item"/* "$base_name/" 2>/dev/null || true
+            else
+                mv "$item" . 2>/dev/null || true
+            fi
+        fi
+    done
+    # Remove empty commands directory
+    rmdir commands 2>/dev/null || true
+fi
+
+# Clean up any unwanted files
+rm -rf README.md LICENSE install.sh scripts CLAUDE.md .gitignore 2>/dev/null || true
+EOF
+        chmod +x .git/hooks/post-merge
+        
+        print_success "Commands installed successfully!"
+    else
+        print_error "No commands directory found in repository"
+        cd ..
+        rm -rf "$INSTALL_PATH"
+        exit 1
+    fi
 fi
 
 # Display available commands
@@ -131,8 +183,12 @@ echo
 # Find all .md files in the installation directory
 if [ -d "$INSTALL_PATH" ]; then
     while IFS= read -r -d '' file; do
+        # Skip hidden directories like .git
+        if [[ "$file" == *"/.git/"* ]]; then
+            continue
+        fi
         # Get relative path from installation directory
-        relative_path="${file#$INSTALL_PATH/}"
+        relative_path="${file#"$INSTALL_PATH/"}"
         # Remove .md extension
         command_path="${relative_path%.md}"
         # Replace / with :
@@ -144,7 +200,9 @@ fi
 echo
 echo "To use these commands in Claude Code, type '/' followed by the command name."
 echo
-echo "To update in the future, run:"
+echo "To update in the future:"
+echo "  cd $INSTALL_PATH && git pull"
+echo "  # or run this install script again:"
 echo "  curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- $PREFIX"
 echo
 print_success "Happy coding with Claude Code! 🚀"
