@@ -59,6 +59,13 @@ Both methods will preserve any local changes you've made to the commands.
 | `/prefix:ai:handoff` | Documents current problem context for handoff to another AI assistant | `output-file` |
 
 
+### Code Commands
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `/prefix:code:shellcheck` | Automatically fix shell script issues using shellcheck analysis | `--check-only`, `--strict`, `--summary-only` |
+
+
 ### Git Commands
 
 | Command | Description | Options |
@@ -71,6 +78,7 @@ Both methods will preserve any local changes you've made to the commands.
 | Command | Description | Options |
 |---------|-------------|---------|
 | `/prefix:project:changelog` | AI-powered CHANGELOG.md management that automatically determines version based on changes | `--analyze`, `--commit`, `--update-version` |
+| `/prefix:project:update-docs` | Intelligently updates project documentation based on code changes and implementation status | `--scope=<type>`, `--analyze`, `--commit` |
 
 <!-- COMMANDS:END -->
 
