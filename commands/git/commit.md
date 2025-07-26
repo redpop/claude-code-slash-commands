@@ -29,10 +29,7 @@ Or with options:
 
 ### Standard Mode (default):
 
-1. Unless specified with `--no-verify`, automatically runs pre-commit checks:
-   - `pnpm lint` to ensure code quality
-   - `pnpm build` to verify the build succeeds
-   - `pnpm generate:docs` to update documentation
+1. Unless specified with `--no-verify`, automatically runs any configured pre-commit checks or hooks if they exist in the project
 2. Checks which files are staged with `git status`
 3. If 0 files are staged, automatically adds all modified and new files with `git add`
 4. Performs a `git diff` to understand what changes are being committed
@@ -57,7 +54,7 @@ When using `--fast` option, the workflow changes:
 
 ## Best Practices for Commits
 
-- **Verify before committing**: Ensure code is linted, builds correctly, and documentation is updated
+- **Verify before committing**: Ensure code passes all project-specific quality checks (linting, tests, builds, etc.)
 - **Atomic commits**: Each commit should contain related changes that serve a single purpose
 - **Split large changes**: If changes touch multiple concerns, split them into separate commits
 - **Conventional commit format**: Use the format `<type>: <description>` where type is one of:
@@ -180,7 +177,7 @@ Example of splitting commits:
 
 ## Command Options
 
-- `--no-verify`: Skip running the pre-commit checks (lint, build, generate:docs)
+- `--no-verify`: Skip running any pre-commit checks or hooks
 - `--fast`: Fast mode - generates 3 suggestions and auto-selects the first one without confirmation
   - Requires files to be already staged
   - No automatic staging of unstaged files
@@ -194,8 +191,8 @@ Example of splitting commits:
 
 ### Standard Mode:
 
-- By default, pre-commit checks (`pnpm lint`, `pnpm build`, `pnpm generate:docs`) will run to ensure code quality
-- If these checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
+- By default, any configured pre-commit checks or hooks will run to ensure code quality
+- If pre-commit checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
 - If specific files are already staged, the command will only commit those files
 - If no files are staged, it will automatically stage all modified and new files
 - The commit message will be constructed based on the changes detected
@@ -207,7 +204,7 @@ Example of splitting commits:
 
 ### Fast Mode (--fast):
 
-- Pre-commit checks still run by default (use `--no-verify` to skip)
+- Pre-commit checks or hooks still run by default (use `--no-verify` to skip)
 - Files must be already staged - no automatic staging
 - Generates exactly 3 commit message suggestions
 - Automatically uses the first suggestion without asking

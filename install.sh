@@ -153,7 +153,7 @@ if [ ! -d "$INSTALL_PATH/.git" ]; then
         cat > .git/hooks/post-merge << 'HOOKEOF'
 #!/bin/bash
 # Post-merge hook to handle directory structure after pull
-# Hook version: 3
+# Hook version: 4
 
 # Function to get list of command files from git
 get_git_command_files() {
@@ -220,13 +220,14 @@ git sparse-checkout reapply 2>/dev/null || true
 
 # Step 5: Check if hooks need updating
 check_hook_version() {
-    local current_version=$(grep "# Hook version:" "$1" 2>/dev/null | sed 's/.*: //')
+    # Extract version from the hook file header (first 10 lines)
+    local current_version=$(head -10 "$1" 2>/dev/null | grep "^# Hook version:" | sed 's/.*: //')
     local repo_file="install.sh"
     
     # Check if install.sh exists in git
     if git show HEAD:install.sh >/dev/null 2>&1; then
-        # Extract hook version from repository's install.sh
-        local latest_version=$(git show HEAD:install.sh | grep -A5 "cat > .git/hooks/post-merge" | grep "# Hook version:" | head -1 | sed 's/.*: //')
+        # Extract hook version from repository's install.sh - look for the exact line after "Hook version:"
+        local latest_version=$(git show HEAD:install.sh | grep -A1 "cat > .git/hooks/post-merge << 'HOOKEOF'" | grep -A1 "Post-merge hook" | grep "^# Hook version:" | sed 's/.*: //')
         
         if [ -n "$latest_version" ] && [ -n "$current_version" ] && [ "$latest_version" != "$current_version" ]; then
             # Get repository URL from git config or remote

@@ -70,9 +70,9 @@ if curl -fsSL "${RAW_URL}/install.sh" -o "$TEMP_FILE"; then
     END_LINE=$(grep -n "^HOOKEOF$" "$TEMP_FILE" | head -1 | cut -d: -f1)
     
     if [ -n "$START_LINE" ] && [ -n "$END_LINE" ]; then
-        # Extract hook version
-        HOOK_VERSION=$(sed -n "$((START_LINE+3))p" "$TEMP_FILE" | grep "# Hook version:" | sed 's/.*: //')
-        CURRENT_VERSION=$(grep "# Hook version:" .git/hooks/post-merge 2>/dev/null | sed 's/.*: //')
+        # Extract hook version - look for version in the hook header
+        HOOK_VERSION=$(sed -n "$((START_LINE+1)),$((START_LINE+10))p" "$TEMP_FILE" | grep "^# Hook version:" | sed 's/.*: //')
+        CURRENT_VERSION=$(head -10 .git/hooks/post-merge 2>/dev/null | grep "^# Hook version:" | sed 's/.*: //')
         
         if [ -z "$HOOK_VERSION" ]; then
             print_error "Could not find hook version in latest install.sh"
