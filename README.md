@@ -78,6 +78,7 @@ Both methods will preserve any local changes you've made to the commands.
 | Command | Description | Options |
 |---------|-------------|---------|
 | `/prefix:project:changelog` | AI-powered CHANGELOG.md management that automatically determines version based on changes | `--analyze`, `--commit`, `--update-version` |
+| `/prefix:project:create-command` | Create new slash commands with proper structure and documentation | `command-name`, `--category=<category>`, `--update-readme` |
 | `/prefix:project:update-docs` | Intelligently updates project documentation based on code changes and implementation status | `--scope=<type>`, `--analyze`, `--commit` |
 
 <!-- COMMANDS:END -->
