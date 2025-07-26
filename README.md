@@ -30,6 +30,8 @@ After installation, all commands are available with your chosen prefix:
 
 ```
 /myprefix:git:commit
+/myprefix:ai:handoff
+/myprefix:project:changelog
 ```
 
 ## Updates
@@ -81,7 +83,7 @@ commands/
     └── my-command.md
 ```
 
-This command would be available as: `/prefix:my-category:my-command`
+This command would be available as: `/myprefix:my-category:my-command`
 
 ## Command Naming Conventions
 

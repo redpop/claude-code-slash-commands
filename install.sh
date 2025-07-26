@@ -58,18 +58,67 @@ if [ -d "$INSTALL_PATH" ]; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         print_info "Updating existing installation..."
-        cd "$INSTALL_PATH"
-        git pull
-        print_success "Updated successfully!"
+        # Create temporary directory for update
+        TEMP_DIR=$(mktemp -d)
+        
+        # Clone latest version
+        if git clone "$REPO_URL" "$TEMP_DIR"; then
+            # Backup existing commands
+            if [ -d "$INSTALL_PATH" ]; then
+                rm -rf "$INSTALL_PATH"
+            fi
+            
+            # Copy only commands directory content
+            if [ -d "$TEMP_DIR/commands" ]; then
+                cp -r "$TEMP_DIR/commands/"* "$INSTALL_PATH/" 2>/dev/null || true
+                mkdir -p "$INSTALL_PATH"
+                cp -r "$TEMP_DIR/commands/"* "$INSTALL_PATH/"
+                print_success "Updated successfully!"
+            else
+                print_error "No commands directory found in repository"
+                rm -rf "$TEMP_DIR"
+                exit 1
+            fi
+        else
+            print_error "Failed to clone repository for update"
+            rm -rf "$TEMP_DIR"
+            exit 1
+        fi
+        
+        # Clean up
+        rm -rf "$TEMP_DIR"
     else
         print_info "Installation cancelled."
         exit 0
     fi
 else
-    # Clone the repository
-    print_info "Cloning repository to $INSTALL_PATH..."
-    git clone "$REPO_URL" "$INSTALL_PATH"
-    print_success "Repository cloned successfully!"
+    # Clone the repository to temporary directory
+    TEMP_DIR=$(mktemp -d)
+    print_info "Cloning repository..."
+    
+    if git clone "$REPO_URL" "$TEMP_DIR"; then
+        print_success "Repository cloned successfully!"
+        
+        # Create target directory and copy only commands
+        print_info "Installing commands to $INSTALL_PATH..."
+        mkdir -p "$INSTALL_PATH"
+        
+        if [ -d "$TEMP_DIR/commands" ]; then
+            cp -r "$TEMP_DIR/commands/"* "$INSTALL_PATH/"
+            print_success "Commands installed successfully!"
+        else
+            print_error "No commands directory found in repository"
+            rm -rf "$TEMP_DIR"
+            exit 1
+        fi
+    else
+        print_error "Failed to clone repository"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    
+    # Clean up
+    rm -rf "$TEMP_DIR"
 fi
 
 # Display available commands
@@ -79,23 +128,23 @@ echo
 echo "Available commands:"
 echo
 
-# Find all .md files in the commands directory
-if [ -d "$INSTALL_PATH/commands" ]; then
+# Find all .md files in the installation directory
+if [ -d "$INSTALL_PATH" ]; then
     while IFS= read -r -d '' file; do
-        # Get relative path from commands directory
-        relative_path="${file#$INSTALL_PATH/commands/}"
+        # Get relative path from installation directory
+        relative_path="${file#$INSTALL_PATH/}"
         # Remove .md extension
         command_path="${relative_path%.md}"
         # Replace / with :
         command_name="${command_path//\//:}"
         echo "  /${PREFIX}:${command_name}"
-    done < <(find "$INSTALL_PATH/commands" -name "*.md" -type f -print0 | sort -z)
+    done < <(find "$INSTALL_PATH" -name "*.md" -type f -print0 | sort -z)
 fi
 
 echo
 echo "To use these commands in Claude Code, type '/' followed by the command name."
 echo
 echo "To update in the future, run:"
-echo "  cd $INSTALL_PATH && git pull"
+echo "  curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- $PREFIX"
 echo
 print_success "Happy coding with Claude Code! 🚀"
