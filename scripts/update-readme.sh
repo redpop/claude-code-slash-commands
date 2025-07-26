@@ -10,6 +10,12 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Function to capitalize first letter of a word
+capitalize_first() {
+    local word="$1"
+    echo "${word^}"
+}
+
 # Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
@@ -70,7 +76,7 @@ has_commands=false
 for category_dir in "$COMMANDS_DIR"/*; do
     if [ -d "$category_dir" ]; then
         category_name=$(basename "$category_dir")
-        category_title=$(echo "$category_name" | sed 's/\b\(.\)/\u\1/g') # Capitalize first letter
+        category_title=$(capitalize_first "$category_name")
         category_has_commands=false
         
         # Temporary storage for this category
@@ -103,7 +109,9 @@ for category_dir in "$COMMANDS_DIR"/*; do
                 options=""
                 if [ -n "$argument_hint" ]; then
                     # Clean up the argument hint and format as code
-                    options=$(echo "$argument_hint" | sed 's/\[//g; s/\]//g; s/ /`, `/g' | sed 's/^/`/; s/$/`/')
+                    # Remove brackets and wrap each option in backticks
+                    cleaned=$(echo "$argument_hint" | sed 's/\[//g; s/\]//g')
+                    options=$(echo "$cleaned" | sed "s/ /, /g; s/^/\`/; s/$/\`/; s/, /\`, \`/g")
                 fi
                 
                 # Add command row
