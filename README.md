@@ -8,6 +8,9 @@ A centralized repository for reusable Claude Code slash commands that can be ins
 
 ```bash
 # Clone the repository with your desired prefix
+git clone https://github.com/redpop/claude-code-slash-commands.git ~/.claude/commands/myprefix
+
+# Or fork and use your own repository
 git clone https://github.com/YourUsername/claude-code-slash-commands.git ~/.claude/commands/myprefix
 ```
 
@@ -15,6 +18,9 @@ git clone https://github.com/YourUsername/claude-code-slash-commands.git ~/.clau
 
 ```bash
 # Download and run the installation script
+curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
+
+# Or from your own fork
 curl -fsSL https://raw.githubusercontent.com/YourUsername/claude-code-slash-commands/main/install.sh | bash -s -- myprefix
 ```
 
@@ -39,11 +45,25 @@ git pull
 
 <!-- COMMANDS:START - DO NOT EDIT -->
 
+### ai Commands
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `/prefix:ai:handoff` | Documents current problem context for handoff to another AI assistant | `output-file` |
+
+
 ### git Commands
 
 | Command | Description | Options |
 |---------|-------------|---------|
 | `/prefix:git:commit` | Creates structured Git commits with Conventional Commit format and emojis | `--no-verify`, `--fast` |
+
+
+### project Commands
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `/prefix:project:changelog` | Manages CHANGELOG.md entries following Keep a Changelog format with version management | `<version>`, `<change_type>`, `<message>`, `--commit`, `--update-version` |
 
 <!-- COMMANDS:END -->
 

@@ -79,12 +79,54 @@ Advanced git commit command that:
 - Uses conventional commit format with emojis
 - Handles both staged and unstaged files intelligently
 
+### `/prefix:project:changelog`
+
+Changelog management command that:
+
+- Adds entries to CHANGELOG.md following Keep a Changelog format
+- Supports semantic versioning validation
+- Can automatically update version in package files
+- Includes emoji prefixes for change types
+- Optionally commits changes with conventional commit message
+
 ## Important Notes
 
 - All documentation should be written in English
 - Commands should be self-contained and include all necessary context
 - Avoid creating example or demo commands - focus on practical, reusable tools
 - The $ARGUMENTS placeholder in commands receives user input after the command invocation
+
+## Code Quality & Linting
+
+### Shellcheck for Bash Scripts
+
+All bash scripts in this repository should be validated with shellcheck to ensure they follow best practices and avoid common pitfalls. This includes:
+
+- `install.sh` - Installation script
+- `scripts/update-readme.sh` - README update script
+- Any future bash scripts added to the repository
+
+#### Running Shellcheck
+
+```bash
+# Check individual script
+shellcheck install.sh
+
+# Check all scripts
+shellcheck scripts/*.sh install.sh
+```
+
+#### Common Shellcheck Recommendations
+
+- Always quote variables: `"$variable"` instead of `$variable`
+- Use `[[ ]]` instead of `[ ]` for conditional expressions
+- Prefer `$()` over backticks for command substitution
+- Handle potential failures with proper error checking
+- Use proper array handling syntax
+
+#### CI Integration
+
+Consider adding shellcheck to your CI pipeline to automatically validate scripts on every commit.
 
 ## README Maintenance
 

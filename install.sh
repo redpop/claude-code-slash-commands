@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Default values
-REPO_URL="https://github.com/YourUsername/claude-code-slash-commands.git"
+REPO_URL="https://github.com/redpop/claude-code-slash-commands.git"
 CLAUDE_COMMANDS_DIR="$HOME/.claude/commands"
 
 # Function to print colored output
