@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2025-01-27
+
+### Added
+
+- ✨ Hybrid Sub-Agent Orchestration System - combines Task Tool parallelization with Claude Code Sub-Agents for 5-10x performance improvements
+- ✨ 5 specialized Sub-Agents: security-specialist, performance-optimizer, test-engineer, code-architect, refactoring-expert
+- ✨ Hybrid commands category - new command type that uses three-phase approach (scan, delegate, synthesize)
+- ✨ Orchestration commands - 5 new parallel analysis commands (analyze-parallel, security-audit, refactor-impact, test-coverage, performance-scan)
+- ✨ Research commands - 3 new research commands (deep-dive, codebase-map, dependency-trace)
+- ✨ Create Sub-Agent helper script - allows easy creation of new specialized agents
+- ✨ Agent templates - 3 templates for creating specialized, analyzer, and helper agents
+- ✨ Hybrid command templates - templates for creating multi-phase analysis commands
+- ✨ Extended documentation in docs/ directory - HYBRID-ARCHITECTURE.md and updated TECHNICAL-GUIDE.md
+
+### Changed
+
+- 🔄 Repository structure reorganized - documentation moved to docs/ directory
+- 🔄 .claude-commands.json enhanced with hybrid mode configuration and agent registry
+- 🔄 create-sub-agent-command.sh updated to support hybrid command creation
+- 🔄 Commands now support both Task-based parallelization and Claude Code Sub-Agent delegation
+- 🔄 Installation script updated to handle new agents directory structure
+
+### Security
+
+- 🔒 All commands translated from German to English for international usage
+- 🔒 Enhanced configuration with performance modes (conservative, balanced, aggressive) for resource management
+
 ## [1.7.0] - 2025-01-26
 
 ### Added
@@ -95,6 +122,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 🐛 Update instructions in README now reflect actual Git-based workflow
 
+[1.8.0]: https://github.com/redpop/claude-code-slash-commands/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/redpop/claude-code-slash-commands/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/redpop/claude-code-slash-commands/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/redpop/claude-code-slash-commands/compare/v1.5.0...v1.6.0
