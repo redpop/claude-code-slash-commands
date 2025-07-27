@@ -1,10 +1,29 @@
 # Claude Code Slash Commands
 
-A centralized repository for reusable Claude Code slash commands that can be installed as a Git repository in `~/.claude/commands` with a custom prefix.
+> ⚠️ **IMPORTANT: This repository is no longer maintained!**
+> 
+> 🚀 **We've moved to [claude-code-toolkit](https://github.com/redpop/claude-code-toolkit)**
+> 
+> The new repository includes:
+> - ✨ All existing slash commands
+> - 🤖 AI Agents for code analysis
+> - 🛠️ Enhanced tools and utilities
+> - 🔄 Improved installation process
+> 
+> Please update your installations:
+> ```bash
+> curl -fsSL https://raw.githubusercontent.com/redpop/claude-code-toolkit/main/install.sh | bash -s -- myprefix
+> ```
 
-## Installation
+---
 
-Use the installation script to set up the commands with your desired prefix:
+**[Archived]** A centralized repository for reusable Claude Code slash commands that can be installed as a Git repository in `~/.claude/commands` with a custom prefix.
+
+## Installation (Deprecated)
+
+> **Note:** Please use the new [claude-code-toolkit](https://github.com/redpop/claude-code-toolkit) instead!
+
+For existing installations:
 
 ```bash
 # Install with your chosen prefix (e.g., "myprefix", "global", etc.)
